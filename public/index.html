@@ -210,9 +210,16 @@
         </div>
       </div>
 
-      <div class="form-group">
-        <label for="providerDid">Provider DID *</label>
-        <input type="text" id="providerDid" placeholder="did:key:z6Mk..." required>
+      <div class="row">
+        <div class="form-group">
+          <label for="providerDid">Provider DID *</label>
+          <input type="text" id="providerDid" placeholder="did:key:z6Mk..." required>
+        </div>
+
+        <div class="form-group">
+          <label for="amount">Amount (cents) *</label>
+          <input type="number" id="amount" placeholder="100" value="100" required min="1">
+        </div>
       </div>
 
       <button type="submit" id="submitBtn">🚀 Send Translation Request</button>
@@ -262,9 +269,10 @@
       const targetLanguage = document.getElementById('targetLanguage').value;
       const sourceLanguage = document.getElementById('sourceLanguage').value;
       const providerDid = document.getElementById('providerDid').value;
+      const amount = parseInt(document.getElementById('amount').value);
 
-      if (!text || !targetLanguage || !providerDid) {
-        showStatus('Please fill in all required fields', 'error');
+      if (!text || !targetLanguage || !providerDid || !amount || amount < 1) {
+        showStatus('Please fill in all required fields with valid values', 'error');
         return;
       }
 
@@ -282,7 +290,7 @@
             targetLanguage,
             sourceLanguage: sourceLanguage || undefined,
             responderDid: providerDid,
-            amount: 100,
+            amount: amount,
           }),
         });
 
