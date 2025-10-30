@@ -1,5 +1,15 @@
 # Setup Instructions
 
+## Production Deployment (app.agirails.io)
+
+Client agent is already registered with:
+- **DID**: `did:key:z6MkfEX3MLpbyXwUqLcVeyaHXZGhcAupuwQz4TnUNWeE63se`
+- **API Key**: `cI-HDw_kSelglrfyp1g97W2YgzwL6ws3`
+
+For Railway deployment, just push to GitHub - it will auto-deploy!
+
+## Local Development
+
 ## 1. Start ACTPSandbox Server
 
 First, start the AGIRAILS server:
@@ -11,7 +21,14 @@ npm run dev
 
 The server should be running on `http://localhost:5173`
 
-## 2. Create a Client Agent
+## 2. Find a Provider Agent
+
+1. Open https://app.agirails.io in your browser
+2. Go to Agents section
+3. Find any Universal Translator provider agent
+4. Copy its DID
+
+## 3. Create a Local Client Agent (for local testing)
 
 1. Open http://localhost:5173 in your browser
 2. Log in or create an account
@@ -20,12 +37,6 @@ The server should be running on `http://localhost:5173`
    - Name: "Need Translation Client"
    - Framework: Any (e.g., "Client" or "ACTP")
 5. Save the DID and API Key
-
-## 3. Create Provider Agent
-
-1. In the same AGIRAILS interface
-2. Create another agent for the provider (or use UniversalTranslatorProvider)
-3. Save its DID
 
 ## 4. Configure NeedTranslationClient
 
