@@ -1,0 +1,356 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Need Translation - Client Agent</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      min-height: 100vh;
+      padding: 20px;
+    }
+
+    .container {
+      max-width: 800px;
+      margin: 0 auto;
+      background: white;
+      border-radius: 20px;
+      box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+      padding: 40px;
+    }
+
+    h1 {
+      color: #333;
+      margin-bottom: 10px;
+      font-size: 32px;
+    }
+
+    .subtitle {
+      color: #666;
+      margin-bottom: 30px;
+      font-size: 14px;
+    }
+
+    .form-group {
+      margin-bottom: 20px;
+    }
+
+    label {
+      display: block;
+      color: #333;
+      font-weight: 600;
+      margin-bottom: 8px;
+      font-size: 14px;
+    }
+
+    input, select, textarea {
+      width: 100%;
+      padding: 12px;
+      border: 2px solid #e0e0e0;
+      border-radius: 8px;
+      font-size: 14px;
+      transition: border-color 0.2s;
+    }
+
+    input:focus, select:focus, textarea:focus {
+      outline: none;
+      border-color: #667eea;
+    }
+
+    textarea {
+      min-height: 120px;
+      resize: vertical;
+      font-family: monospace;
+    }
+
+    .row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 15px;
+    }
+
+    button {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+      border: none;
+      padding: 14px 30px;
+      border-radius: 8px;
+      font-size: 16px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: transform 0.2s, box-shadow 0.2s;
+      width: 100%;
+      margin-top: 10px;
+    }
+
+    button:hover:not(:disabled) {
+      transform: translateY(-2px);
+      box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+    }
+
+    button:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+
+    .status {
+      margin-top: 20px;
+      padding: 12px;
+      border-radius: 8px;
+      font-size: 14px;
+      display: none;
+    }
+
+    .status.success {
+      background: #d4edda;
+      border: 1px solid #c3e6cb;
+      color: #155724;
+    }
+
+    .status.error {
+      background: #f8d7da;
+      border: 1px solid #f5c6cb;
+      color: #721c24;
+    }
+
+    .status.loading {
+      background: #d1ecf1;
+      border: 1px solid #bee5eb;
+      color: #0c5460;
+    }
+
+    .results {
+      margin-top: 30px;
+      padding: 20px;
+      background: #f8f9fa;
+      border-radius: 8px;
+      display: none;
+    }
+
+    .results h2 {
+      color: #333;
+      margin-bottom: 15px;
+      font-size: 20px;
+    }
+
+    .results pre {
+      background: #2d2d2d;
+      color: #f8f8f2;
+      padding: 15px;
+      border-radius: 8px;
+      overflow-x: auto;
+      font-size: 13px;
+      line-height: 1.5;
+    }
+
+    .polling-indicator {
+      display: inline-block;
+      width: 8px;
+      height: 8px;
+      background: #28a745;
+      border-radius: 50%;
+      margin-right: 8px;
+      animation: pulse 2s infinite;
+    }
+
+    @keyframes pulse {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.3; }
+    }
+
+    .connection-info {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 20px;
+      padding: 12px;
+      background: #f0f0f0;
+      border-radius: 8px;
+    }
+
+    .connection-info span {
+      font-size: 13px;
+      color: #666;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>🌐 Need Translation</h1>
+    <p class="subtitle">Client Agent - AI Contract Transfer Protocol</p>
+
+    <div class="connection-info">
+      <span>Server: <code id="serverUrl">localhost:8788</code></span>
+      <span id="pollingStatus"><span class="polling-indicator"></span>Polling</span>
+    </div>
+
+    <form id="translationForm">
+      <div class="form-group">
+        <label for="text">Text to Translate *</label>
+        <textarea id="text" placeholder="Enter the text you want to translate..." required></textarea>
+      </div>
+
+      <div class="row">
+        <div class="form-group">
+          <label for="sourceLanguage">Source Language</label>
+          <input type="text" id="sourceLanguage" placeholder="English (optional)">
+        </div>
+
+        <div class="form-group">
+          <label for="targetLanguage">Target Language *</label>
+          <input type="text" id="targetLanguage" placeholder="Spanish" required>
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label for="providerDid">Provider DID *</label>
+        <input type="text" id="providerDid" placeholder="did:key:z6Mk..." required>
+      </div>
+
+      <button type="submit" id="submitBtn">🚀 Send Translation Request</button>
+    </form>
+
+    <div class="status" id="status"></div>
+
+    <div class="results" id="results">
+      <h2>📋 Result</h2>
+      <pre id="resultContent"></pre>
+    </div>
+  </div>
+
+  <script>
+    const API_URL = window.location.origin;
+
+    // Update server URL display
+    document.getElementById('serverUrl').textContent = API_URL.replace(/^https?:\/\//, '');
+
+    const form = document.getElementById('translationForm');
+    const status = document.getElementById('status');
+    const results = document.getElementById('results');
+    const resultContent = document.getElementById('resultContent');
+    const submitBtn = document.getElementById('submitBtn');
+
+    function showStatus(message, type) {
+      status.textContent = message;
+      status.className = 'status ' + type;
+      status.style.display = 'block';
+      results.style.display = 'none';
+    }
+
+    function hideStatus() {
+      status.style.display = 'none';
+    }
+
+    function showResult(data) {
+      resultContent.textContent = JSON.stringify(data, null, 2);
+      results.style.display = 'block';
+      hideStatus();
+    }
+
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+
+      const text = document.getElementById('text').value;
+      const targetLanguage = document.getElementById('targetLanguage').value;
+      const sourceLanguage = document.getElementById('sourceLanguage').value;
+      const providerDid = document.getElementById('providerDid').value;
+
+      if (!text || !targetLanguage || !providerDid) {
+        showStatus('Please fill in all required fields', 'error');
+        return;
+      }
+
+      submitBtn.disabled = true;
+      showStatus('Creating translation transaction...', 'loading');
+
+      try {
+        const response = await fetch(`${API_URL}/create-translation`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            text,
+            targetLanguage,
+            sourceLanguage: sourceLanguage || undefined,
+            responderDid: providerDid,
+            amount: 100,
+          }),
+        });
+
+        const data = await response.json();
+
+        if (!response.ok) {
+          throw new Error(data.error || 'Failed to create transaction');
+        }
+
+        showStatus(`Transaction created: ${data.transaction.id}. Polling for results...`, 'success');
+        submitBtn.disabled = false;
+
+        // Start polling for results
+        pollForResult(data.transaction.id);
+
+      } catch (error) {
+        showStatus(`Error: ${error.message}`, 'error');
+        submitBtn.disabled = false;
+      }
+    });
+
+    async function pollForResult(transactionId) {
+      const maxAttempts = 60; // 5 minutes max
+      let attempts = 0;
+
+      const poll = setInterval(async () => {
+        attempts++;
+        
+        if (attempts > maxAttempts) {
+          clearInterval(poll);
+          showStatus('Timeout waiting for translation result', 'error');
+          return;
+        }
+
+        try {
+          const response = await fetch(`${API_URL}/results/${transactionId}`);
+          
+          if (response.status === 404) {
+            // Result not ready yet, keep polling
+            return;
+          }
+
+          if (!response.ok) {
+            throw new Error('Failed to fetch result');
+          }
+
+          const data = await response.json();
+          clearInterval(poll);
+          showResult(data);
+        } catch (error) {
+          // Network error, keep trying
+          console.error('Poll error:', error);
+        }
+      }, 5000); // Poll every 5 seconds
+    }
+
+    // Check health on load
+    fetch(`${API_URL}/health`)
+      .then(res => res.json())
+      .then(data => {
+        if (!data.ok) {
+          document.getElementById('pollingStatus').innerHTML = '<span style="color: red;">●</span> Offline';
+        }
+      })
+      .catch(() => {
+        document.getElementById('pollingStatus').innerHTML = '<span style="color: red;">●</span> Offline';
+      });
+  </script>
+</body>
+</html>
+

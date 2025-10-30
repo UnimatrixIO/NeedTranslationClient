@@ -1,4 +1,7 @@
 import http, { IncomingMessage, ServerResponse } from 'http';
+import fs from 'fs';
+import path from 'path';
+import { fileURLToPath } from 'url';
 import pino from 'pino';
 import { config } from './config.js';
 import { getPollingEnabled, setPollingEnabled, getResults, getResult } from './client.js';
@@ -7,10 +10,27 @@ import type { TranslationRequest } from './client.js';
 
 const log = pino({ level: process.env.LOG_LEVEL ?? 'info' });
 
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+
 export function startServer(): http.Server {
   const server = http.createServer(async (req: IncomingMessage, res: ServerResponse) => {
     try {
       if (!req.url) return send(res, 404, { error: 'not found' });
+
+      // Serve frontend
+      if (req.method === 'GET' && (req.url === '/' || req.url === '/index.html')) {
+        const htmlPath = path.join(__dirname, '..', 'public', 'index.html');
+        try {
+          const html = fs.readFileSync(htmlPath, 'utf-8');
+          res.statusCode = 200;
+          res.setHeader('content-type', 'text/html');
+          res.end(html);
+          return;
+        } catch (err) {
+          log.error({ err }, 'failed to read index.html');
+        }
+      }
 
       // Health check
       if (req.method === 'GET' && req.url === '/health') {
