@@ -1,0 +1,25 @@
+{
+  "name": "need-translation-client",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "AGIRAILS standalone client agent for translation requests using ACTP",
+  "scripts": {
+    "dev": "tsx src/index.ts",
+    "build": "tsc -p tsconfig.json",
+    "start": "node dist/index.js",
+    "typecheck": "tsc -p tsconfig.json --noEmit"
+  },
+  "dependencies": {
+    "dotenv": "^16.4.5",
+    "pino": "^9.4.0",
+    "undici": "^6.19.8",
+    "zod": "^3.23.8",
+    "typescript": "^5.6.3"
+  },
+  "devDependencies": {
+    "@types/node": "^22.7.5",
+    "tsx": "^4.19.1"
+  }
+}
+
