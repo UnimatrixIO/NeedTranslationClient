@@ -27,6 +27,43 @@ function shouldProcess(tx: Transaction): boolean {
   return true;
 }
 
+async function getResultFromMessages(transactionId: string): Promise<TranslationResult | null> {
+  const messages = await sdk.getMessages(transactionId);
+  
+  // Look for COMPLETE message with workResult
+  for (let i = messages.length - 1; i >= 0; i--) {
+    const m = messages[i];
+    if (m.messageType === 'COMPLETE') {
+      const payload = m.payload as any;
+      
+      // Check for workResult field (from completeTransaction)
+      if (payload?.workResult) {
+        const wr = payload.workResult;
+        if (wr.translatedText && wr.targetLanguage && wr.sourceLanguage && wr.confidence) {
+          return {
+            translatedText: wr.translatedText,
+            targetLanguage: wr.targetLanguage,
+            sourceLanguage: wr.sourceLanguage,
+            confidence: wr.confidence,
+          };
+        }
+      }
+      
+      // Check for translation field (from postMessage COMPLETE)
+      if (payload?.translation && payload?.targetLanguage && payload?.sourceLanguage) {
+        return {
+          translatedText: payload.translation,
+          targetLanguage: payload.targetLanguage,
+          sourceLanguage: payload.sourceLanguage,
+          confidence: 95, // Default confidence if not provided
+        };
+      }
+    }
+  }
+  
+  return null;
+}
+
 export async function processOnce(): Promise<void> {
   const all = await sdk.listTransactions();
   const candidates = all.filter(shouldProcess);
@@ -36,13 +73,14 @@ export async function processOnce(): Promise<void> {
     try {
       log.info({ txId: tx.id, state: tx.state }, 'processing completed transaction');
 
-      if (!tx.workResult) {
-        log.warn({ txId: tx.id }, 'no work result found');
+      const workResult = await getResultFromMessages(tx.id);
+      
+      if (!workResult) {
+        log.warn({ txId: tx.id }, 'no work result found in messages');
         processed.add(tx.id);
         continue;
       }
 
-      const workResult = tx.workResult as TranslationResult;
       log.info(
         {
           txId: tx.id,
