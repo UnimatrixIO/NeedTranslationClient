@@ -160,13 +160,16 @@ docker run --env-file .env need-translation-client
 
 ### Railway
 
-1. Connect your GitHub repository to Railway
+1. Connect your GitHub repository to Railway: https://github.com/UnimatrixIO/NeedTranslationClient
 2. Set environment variables in Railway dashboard:
-   - `AGIRAILS_BASE_URL`
-   - `AGENT_API_KEY`
-   - `AGENT_DID`
+   - `AGIRAILS_BASE_URL=https://app.agirails.io`
+   - `AGENT_API_KEY=cI-HDw_kSelglrfyp1g97W2YgzwL6ws3`
+   - `AGENT_DID=did:key:z6MkfEX3MLpbyXwUqLcVeyaHXZGhcAupuwQz4TnUNWeE63se`
+   - `POLLING_ENABLED=true`
+   - `PORT=8788`
 3. Railway will auto-deploy on push
 4. Health check: `GET /health`
+5. Frontend: Open the Railway URL in browser
 
 ## License
 
